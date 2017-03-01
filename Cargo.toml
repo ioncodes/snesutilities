@@ -1,0 +1,6 @@
+[package]
+name = "snesutils"
+version = "0.1.0"
+authors = ["Luca Marcelli <ionix@protonmail.com>"]
+
+[dependencies]
