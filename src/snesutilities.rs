@@ -5,7 +5,7 @@ use std::io::SeekFrom;
 use std::str;
 
 #[derive(Debug)]
-pub enum RomMakupType {
+pub enum RomMarkupType {
     LoROM = 32, // 32 // 32704
     HiROM = 33, // 33 // 65472
     LoROMFastROM = 48, // 48
@@ -32,7 +32,7 @@ pub struct VideoMode {
 }
 pub struct SnesUtils {
     pub internal_name: String,
-    pub rom_makeup_type: RomMakupType,
+    pub rom_makeup_type: RomMarkupType,
     pub rom_type: RomType,
     pub rom_size: u8,
     pub sram_size: u8,
@@ -44,17 +44,17 @@ impl SnesUtils {
         let mut file = &mut File::open(file_name).unwrap(); // load the file
         let internal_name = read_file(file); // returns the internal name
         let mut buffer = [0; 1]; // create initial buffer
-        buffer_readnext(&mut file, &mut buffer); // read rom makeup byte
+        buffer_read_next(&mut file, &mut buffer); // read rom makeup byte
         let rom_makeup_type = get_rom_makeup_type(buffer); // get rom makeup type
-        buffer_readnext(&mut file, &mut buffer); // read rom type byte
+        buffer_read_next(&mut file, &mut buffer); // read rom type byte
         let rom_type = get_rom_type(buffer); // get rom type
-        buffer_readnext(&mut file, &mut buffer); // read rom size byte
+        buffer_read_next(&mut file, &mut buffer); // read rom size byte
         let rom_size = buffer[0]; // get romsize
-        buffer_readnext(&mut file, &mut buffer); // read sram size byte
+        buffer_read_next(&mut file, &mut buffer); // read sram size byte
         let sram_size = buffer[0]; // get sram size
-        buffer_readnext(&mut file, &mut buffer); // read video mode byte
+        buffer_read_next(&mut file, &mut buffer); // read video mode byte
         let video_mode = get_location(buffer); // get video mode
-        buffer_readnext(&mut file, &mut buffer); // read license byte
+        buffer_read_next(&mut file, &mut buffer); // read license byte
         let license = LICENSES[buffer[0] as usize].to_string(); // get developer license
 
         SnesUtils {
@@ -90,7 +90,7 @@ fn read_file(file: &mut File) -> String {
 }
 
 #[allow(unused_must_use)]
-fn buffer_readnext(file: &mut File, buffer: &mut [u8; 1]) {
+fn buffer_read_next(file: &mut File, buffer: &mut [u8; 1]) {
     file.read(buffer);
 }
 
@@ -107,15 +107,15 @@ fn get_rom_type(buffer: [u8; 1]) -> RomType {
     }
 }
 
-fn get_rom_makeup_type(buffer: [u8; 1]) -> RomMakupType {
+fn get_rom_makeup_type(buffer: [u8; 1]) -> RomMarkupType {
     match buffer {
-        buffer if buffer[0] == RomMakupType::LoROM as u8 => RomMakupType::LoROM,
-        buffer if buffer[0] == RomMakupType::HiROM as u8 => RomMakupType::HiROM,
-        buffer if buffer[0] == RomMakupType::LoROMFastROM as u8 => RomMakupType::LoROMFastROM,
-        buffer if buffer[0] == RomMakupType::HiROMFastROM as u8 => RomMakupType::HiROMFastROM,
-        buffer if buffer[0] == RomMakupType::ExLoROM as u8 => RomMakupType::ExLoROM,
-        buffer if buffer[0] == RomMakupType::ExHiROM as u8 => RomMakupType::ExHiROM,
-        _ => RomMakupType::Unknown,
+        buffer if buffer[0] == RomMarkupType::LoROM as u8 => RomMarkupType::LoROM,
+        buffer if buffer[0] == RomMarkupType::HiROM as u8 => RomMarkupType::HiROM,
+        buffer if buffer[0] == RomMarkupType::LoROMFastROM as u8 => RomMarkupType::LoROMFastROM,
+        buffer if buffer[0] == RomMarkupType::HiROMFastROM as u8 => RomMarkupType::HiROMFastROM,
+        buffer if buffer[0] == RomMarkupType::ExLoROM as u8 => RomMarkupType::ExLoROM,
+        buffer if buffer[0] == RomMarkupType::ExHiROM as u8 => RomMarkupType::ExHiROM,
+        _ => RomMarkupType::Unknown,
     }
 }
 
