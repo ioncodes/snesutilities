@@ -4,6 +4,17 @@ use std::io::Seek;
 use std::io::SeekFrom;
 use std::str;
 
+macro_rules! number_to_enum {
+    ($number:expr => $enum:ident<$type:ty>{ $($field:ident),+}; $error:expr) => {
+        match $number{
+            $(_ if $number == $enum::$field as $type => {
+                $enum::$field
+            })+
+            _ => $error
+        }
+    };
+}
+
 #[derive(Debug)]
 pub enum RomMarkupType {
     LoROM = 32, // 32 // 32704
@@ -14,7 +25,8 @@ pub enum RomMarkupType {
     ExHiROM = 53, // 53
     Unknown,
 }
-#[derive(Debug)]
+#[repr(u8)]
+#[derive(Debug, PartialEq)]
 pub enum RomType {
     ROM = 0,
     ROMRAM = 1,
@@ -47,7 +59,7 @@ impl SnesUtils {
         buffer_read_next(&mut file, &mut buffer); // read rom makeup byte
         let rom_makeup_type = get_rom_makeup_type(buffer); // get rom makeup type
         buffer_read_next(&mut file, &mut buffer); // read rom type byte
-        let rom_type = get_rom_type(buffer); // get rom type
+        let rom_type = get_rom_type(buffer[0]); // get rom type
         buffer_read_next(&mut file, &mut buffer); // read rom size byte
         let rom_size = buffer[0]; // get romsize
         buffer_read_next(&mut file, &mut buffer); // read sram size byte
@@ -94,17 +106,19 @@ fn buffer_read_next(file: &mut File, buffer: &mut [u8; 1]) {
     file.read(buffer);
 }
 
-fn get_rom_type(buffer: [u8; 1]) -> RomType {
-    match buffer {
-        buffer if buffer[0] == RomType::ROM as u8 => RomType::ROM,
-        buffer if buffer[0] == RomType::ROMRAM as u8 => RomType::ROMRAM,
-        buffer if buffer[0] == RomType::ROMSRAM as u8 => RomType::ROMSRAM,
-        buffer if buffer[0] == RomType::ROMDSP1 as u8 => RomType::ROMDSP1,
-        buffer if buffer[0] == RomType::ROMDSP1RAM as u8 => RomType::ROMDSP1RAM,
-        buffer if buffer[0] == RomType::ROMDSP1SRAM as u8 => RomType::ROMDSP1SRAM,
-        buffer if buffer[0] == RomType::FX as u8 => RomType::FX,
-        _ => RomType::Unknown,
-    }
+fn get_rom_type(buffer: u8) -> RomType {
+    number_to_enum!(buffer => RomType<u8>{
+        ROM,
+        ROMRAM,
+        ROMSRAM,
+        ROMDSP1,
+        ROMDSP1RAM,
+        ROMDSP1SRAM,
+        FX,
+        Unknown
+    };
+    panic!("Cannot convert number to ''")
+    )
 }
 
 fn get_rom_makeup_type(buffer: [u8; 1]) -> RomMarkupType {
@@ -118,6 +132,8 @@ fn get_rom_makeup_type(buffer: [u8; 1]) -> RomMarkupType {
         _ => RomMarkupType::Unknown,
     }
 }
+
+
 
 fn get_location(buffer: u8) -> VideoMode {
     return match buffer {
