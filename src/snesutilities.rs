@@ -117,7 +117,7 @@ fn get_rom_type(buffer: u8) -> RomType {
         FX,
         Unknown
     };
-    panic!("Cannot convert number to ''")
+    panic!("Cannot convert number to get_rom_type")
     )
 }
 
