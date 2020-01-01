@@ -53,7 +53,7 @@ impl SnesUtils {
         buffer_read_next(&mut file, &mut buffer); // read sram size byte
         let sram_size = buffer[0]; // get sram size
         buffer_read_next(&mut file, &mut buffer); // read video mode byte
-        let video_mode = get_location(buffer); // get video mode
+        let video_mode = get_location(buffer[0]); // get video mode
         buffer_read_next(&mut file, &mut buffer); // read license byte
         let license = LICENSES[buffer[0] as usize].to_string(); // get developer license
 
@@ -119,87 +119,87 @@ fn get_rom_makeup_type(buffer: [u8; 1]) -> RomMarkupType {
     }
 }
 
-fn get_location(buffer: [u8; 1]) -> VideoMode {
+fn get_location(buffer: u8) -> VideoMode {
     return match buffer {
-        buffer if buffer[0] == 0 as u8 => {
+        0 => {
             VideoMode {
                 country: "Japan".to_string(),
                 mode: "NTSC".to_string(),
             }
         }
-        buffer if buffer[0] == 1 as u8 => {
+         1 => {
             VideoMode {
                 country: "USA".to_string(),
                 mode: "NTSC".to_string(),
             }
         }
-        buffer if buffer[0] == 2 as u8 => {
+         2 => {
             VideoMode {
                 country: "Europe".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 3 as u8 => {
+         3 => {
             VideoMode {
                 country: "Sweden".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 4 as u8 => {
+         4 => {
             VideoMode {
                 country: "Finland".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 5 as u8 => {
+         5 => {
             VideoMode {
                 country: "Denmark".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 6 as u8 => {
+         6 => {
             VideoMode {
                 country: "France".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 7 as u8 => {
+         7 => {
             VideoMode {
                 country: "Holland".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 8 as u8 => {
+         8 => {
             VideoMode {
                 country: "Spain".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 9 as u8 => {
+         9 => {
             VideoMode {
                 country: "Germany".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 10 as u8 => {
+         10 => {
             VideoMode {
                 country: "Italy".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 11 as u8 => {
+         11 => {
             VideoMode {
                 country: "China".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 12 as u8 => {
+         12 => {
             VideoMode {
                 country: "Indonesia".to_string(),
                 mode: "PAL".to_string(),
             }
         }
-        buffer if buffer[0] == 13 as u8 => {
+         13 => {
             VideoMode {
                 country: "Korea".to_string(),
                 mode: "PAL".to_string(),
