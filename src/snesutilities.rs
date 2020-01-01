@@ -57,7 +57,7 @@ impl SnesUtils {
         let internal_name = read_file(file); // returns the internal name
         let mut buffer = [0; 1]; // create initial buffer
         buffer_read_next(&mut file, &mut buffer); // read rom makeup byte
-        let rom_makeup_type = get_rom_makeup_type(buffer); // get rom makeup type
+        let rom_makeup_type = get_rom_makeup_type(buffer[0]); // get rom makeup type
         buffer_read_next(&mut file, &mut buffer); // read rom type byte
         let rom_type = get_rom_type(buffer[0]); // get rom type
         buffer_read_next(&mut file, &mut buffer); // read rom size byte
@@ -121,16 +121,19 @@ fn get_rom_type(buffer: u8) -> RomType {
     )
 }
 
-fn get_rom_makeup_type(buffer: [u8; 1]) -> RomMarkupType {
-    match buffer {
-        buffer if buffer[0] == RomMarkupType::LoROM as u8 => RomMarkupType::LoROM,
-        buffer if buffer[0] == RomMarkupType::HiROM as u8 => RomMarkupType::HiROM,
-        buffer if buffer[0] == RomMarkupType::LoROMFastROM as u8 => RomMarkupType::LoROMFastROM,
-        buffer if buffer[0] == RomMarkupType::HiROMFastROM as u8 => RomMarkupType::HiROMFastROM,
-        buffer if buffer[0] == RomMarkupType::ExLoROM as u8 => RomMarkupType::ExLoROM,
-        buffer if buffer[0] == RomMarkupType::ExHiROM as u8 => RomMarkupType::ExHiROM,
-        _ => RomMarkupType::Unknown,
-    }
+fn get_rom_makeup_type(buffer: u8) -> RomMarkupType {
+
+    number_to_enum!(buffer => RomMarkupType<u8>{
+        LoROM,
+    HiROM,
+    LoROMFastROM,
+    HiROMFastROM,
+    ExLoROM,
+    ExHiROM,
+    Unknown,
+    };
+    panic!("Cannot convert number to RomMarkupType")
+    )
 }
 
 
