@@ -71,13 +71,13 @@ impl SnesUtils {
         let license = LICENSES[buffer[0] as usize].to_string(); // get developer license
 
         SnesUtils {
-            internal_name: internal_name,
-            rom_makeup_type: rom_makeup_type,
-            rom_type: rom_type,
-            rom_size: rom_size,
-            sram_size: sram_size,
-            video_mode: video_mode,
-            license: license,
+            internal_name,
+            rom_makeup_type,
+            rom_type,
+            rom_size,
+            sram_size,
+            video_mode,
+            license,
         }
     }
 }
