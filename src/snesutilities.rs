@@ -15,6 +15,7 @@ macro_rules! number_to_enum {
     };
 }
 
+#[repr(u8)]
 #[derive(Debug)]
 pub enum RomMarkupType {
     LoROM = 32, // 32 // 32704
