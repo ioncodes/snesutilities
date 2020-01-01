@@ -131,7 +131,7 @@ fn get_rom_makeup_type(buffer: u8) -> RomMarkupType {
     HiROMFastROM,
     ExLoROM,
     ExHiROM,
-    Unknown,
+    Unknown
     };
     panic!("Cannot convert number to RomMarkupType")
     )
