@@ -18,17 +18,6 @@ enum SnesBufferIndex {
     LicensesIndex = 5,
 }
 
-macro_rules! number_to_enum {
-    ($number:expr => $enum:ident<$type:ty>{ $($field:ident),+}; $error:expr) => {
-        match $number{
-            $(_ if $number == $enum::$field as $type => {
-                $enum::$field
-            })+
-            _ => $error
-        }
-    };
-}
-
 #[repr(u8)]
 #[derive(Debug)]
 pub enum RomMarkupType {
@@ -40,6 +29,7 @@ pub enum RomMarkupType {
     ExHiROM = 53,      // 53
     Unknown,
 }
+
 #[repr(u8)]
 #[derive(Debug, PartialEq)]
 pub enum RomType {
@@ -65,6 +55,17 @@ pub struct SnesUtils {
     pub sram_size: u8,
     pub video_mode: VideoMode,
     pub license: String,
+}
+
+macro_rules! number_to_enum {
+    ($number:expr => $enum:ident<$type:ty>{ $($field:ident),+}; $error:expr) => {
+        match $number{
+            $(_ if $number == $enum::$field as $type => {
+                $enum::$field
+            })+
+            _ => $error
+        }
+    };
 }
 
 impl SnesUtils {
