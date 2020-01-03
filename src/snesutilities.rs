@@ -79,10 +79,10 @@ impl SnesUtils {
             internal_name: read_file(file),
             rom_makeup_type: get_rom_makeup_type(buffer),
             rom_type: get_rom_type(buffer),
-            rom_size: buffer[RowSizeIndex],
-            sram_size: buffer[SRowSizeIndex],
+            rom_size: buffer[RowSizeIndex as usize],
+            sram_size: buffer[SRowSizeIndex as usize],
             video_mode: get_video_mode(buffer),
-            license: LICENSES[buffer[LicensesIndex] as usize].to_string(),
+            license: LICENSES[buffer[LicensesIndex as usize] as usize].to_string(),
         }
     }
 }
@@ -115,7 +115,7 @@ fn read_buffer(file: &mut File, buffer: &mut [u8; SNES_BUFFER_SIZE]) {
 }
 
 fn get_rom_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomType {
-    number_to_enum!(buffer[RomTypeIndex] => RomType<u8>{
+    number_to_enum!(buffer[RowTypeIndex as usize] => RomType<u8>{
             ROM,
             ROMRAM,
             ROMSRAM,
@@ -130,7 +130,7 @@ fn get_rom_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomType {
 }
 
 fn get_rom_makeup_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomMarkupType {
-    number_to_enum!(buffer[RomMarkupTypeIndex] => RomMarkupType<u8>{
+    number_to_enum!(buffer[RomMarkupTypeIndex as usize] => RomMarkupType<u8>{
             LoROM,
             HiROM,
             LoROMFastROM,
@@ -144,7 +144,7 @@ fn get_rom_makeup_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomMarkupType {
 }
 
 fn get_video_mode(buffer: [u8; SNES_BUFFER_SIZE]) -> VideoMode {
-    return match buffer[VideoModeIndex] {
+    return match buffer[VideoModeIndex as usize] {
         0 => VideoMode {
             country: "Japan".to_string(),
             mode: "NTSC".to_string(),
