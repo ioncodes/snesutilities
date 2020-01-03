@@ -1,9 +1,11 @@
+use snesutilities::SnesBufferIndex::{
+    LicensesIndex, RomMarkupTypeIndex, RowSizeIndex, RowTypeIndex, SRowSizeIndex, VideoModeIndex,
+};
 use std::fs::File;
 use std::io::Read;
 use std::io::Seek;
 use std::io::SeekFrom;
 use std::str;
-use snesutilities::SnesBufferIndex::{SRowSizeIndex, RowTypeIndex, RomMarkupTypeIndex, VideoModeIndex, RowSizeIndex, LicensesIndex};
 
 const SNES_BUFFER_SIZE: usize = 6;
 
@@ -13,7 +15,7 @@ enum SnesBufferIndex {
     RowSizeIndex = 2,
     SRowSizeIndex = 3,
     VideoModeIndex = 4,
-    LicensesIndex = 5
+    LicensesIndex = 5,
 }
 
 macro_rules! number_to_enum {
@@ -67,17 +69,16 @@ pub struct SnesUtils {
 
 impl SnesUtils {
     pub fn new(file_name: String) -> SnesUtils {
-
         let mut buffer = [0; SNES_BUFFER_SIZE]; // create initial buffer
         let mut file = &mut File::open(file_name).unwrap(); // load the file
 
         read_buffer(&mut file, &mut buffer); // read rom makeup byte
 
         SnesUtils {
-            internal_name:  read_file(file),
+            internal_name: read_file(file),
             rom_makeup_type: get_rom_makeup_type(buffer),
             rom_type: get_rom_type(buffer),
-            rom_size:  buffer[RowSizeIndex],
+            rom_size: buffer[RowSizeIndex],
             sram_size: buffer[SRowSizeIndex],
             video_mode: get_video_mode(buffer),
             license: LICENSES[buffer[LicensesIndex] as usize].to_string(),
@@ -88,8 +89,6 @@ impl SnesUtils {
 #[allow(unused_must_use)]
 fn read_file(file: &mut File) -> String {
     let mut vec = vec![0u8; 21];
-    file.seek(SeekFrom::Start(32704));
-    file.read(vec.as_mut_slice()).unwrap();
     let mut is_lo_rom = true;
     for byte in vec.iter() {
         if *byte <= 31 || *byte > 127 {
@@ -97,11 +96,15 @@ fn read_file(file: &mut File) -> String {
             break;
         }
     }
-    if !is_lo_rom {
-        vec = vec![0u8; 21];
-        file.seek(SeekFrom::Start(65472)); // it's hirom
-        file.read(vec.as_mut_slice()).unwrap();
-    }
+
+    let size = match is_lo_rom {
+        true => 32704,
+        false => 65472,
+    };
+
+    file.seek(SeekFrom::Start(size)); // it's hirom
+    file.read(vec.as_mut_slice()).unwrap();
+
     return str::from_utf8(&vec).unwrap().to_string();
 }
 
@@ -111,7 +114,6 @@ fn read_buffer(file: &mut File, buffer: &mut [u8; SNES_BUFFER_SIZE]) {
 }
 
 fn get_rom_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomType {
-
     number_to_enum!(buffer[RomTypeIndex] => RomType<u8>{
             ROM,
             ROMRAM,
@@ -127,7 +129,6 @@ fn get_rom_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomType {
 }
 
 fn get_rom_makeup_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomMarkupType {
-
     number_to_enum!(buffer[RomMarkupTypeIndex] => RomMarkupType<u8>{
             LoROM,
             HiROM,
@@ -142,8 +143,7 @@ fn get_rom_makeup_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomMarkupType {
 }
 
 fn get_video_mode(buffer: [u8; SNES_BUFFER_SIZE]) -> VideoMode {
-
-    return match buffer[VideoModeIndex]{
+    return match buffer[VideoModeIndex] {
         0 => VideoMode {
             country: "Japan".to_string(),
             mode: "NTSC".to_string(),
