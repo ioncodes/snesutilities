@@ -3,6 +3,18 @@ use std::io::Read;
 use std::io::Seek;
 use std::io::SeekFrom;
 use std::str;
+use snesutilities::SnesBufferIndex::{SRowSizeIndex, RowTypeIndex, RomMarkupTypeIndex, VideoModeIndex, RowSizeIndex, LicensesIndex};
+
+const SNES_BUFFER_SIZE: usize = 6;
+
+enum SnesBufferIndex {
+    RomMarkupTypeIndex = 0,
+    RowTypeIndex = 1,
+    RowSizeIndex = 2,
+    SRowSizeIndex = 3,
+    VideoModeIndex = 4,
+    LicensesIndex = 5
+}
 
 macro_rules! number_to_enum {
     ($number:expr => $enum:ident<$type:ty>{ $($field:ident),+}; $error:expr) => {
@@ -52,39 +64,23 @@ pub struct SnesUtils {
     pub video_mode: VideoMode,
     pub license: String,
 }
+
 impl SnesUtils {
     pub fn new(file_name: String) -> SnesUtils {
+
+        let mut buffer = [0; SNES_BUFFER_SIZE]; // create initial buffer
         let mut file = &mut File::open(file_name).unwrap(); // load the file
-        let internal_name = read_file(file); // returns the internal name
 
-        let mut buffer = [0; 1]; // create initial buffer
-        buffer_read_next(&mut file, &mut buffer); // read rom makeup byte
-
-        let rom_makeup_type = get_rom_makeup_type(buffer[0]); // get rom makeup type
-        buffer_read_next(&mut file, &mut buffer); // read rom type byte
-
-        let rom_type = get_rom_type(buffer[0]); // get rom type
-        buffer_read_next(&mut file, &mut buffer); // read rom size byte
-
-        let rom_size = buffer[0]; // get romsize
-        buffer_read_next(&mut file, &mut buffer); // read sram size byte
-
-        let sram_size = buffer[0]; // get sram size
-        buffer_read_next(&mut file, &mut buffer); // read video mode byte
-
-        let video_mode = get_location(buffer[0]); // get video mode
-        buffer_read_next(&mut file, &mut buffer); // read license byte
-
-        let license = LICENSES[buffer[0] as usize].to_string(); // get developer license
+        read_buffer(&mut file, &mut buffer); // read rom makeup byte
 
         SnesUtils {
-            internal_name,
-            rom_makeup_type,
-            rom_type,
-            rom_size,
-            sram_size,
-            video_mode,
-            license,
+            internal_name:  read_file(file),
+            rom_makeup_type: get_rom_makeup_type(buffer),
+            rom_type: get_rom_type(buffer),
+            rom_size:  buffer[RowSizeIndex],
+            sram_size: buffer[SRowSizeIndex],
+            video_mode: get_video_mode(buffer),
+            license: LICENSES[buffer[LicensesIndex] as usize].to_string(),
         }
     }
 }
@@ -110,12 +106,13 @@ fn read_file(file: &mut File) -> String {
 }
 
 #[allow(unused_must_use)]
-fn buffer_read_next(file: &mut File, buffer: &mut [u8; 1]) {
+fn read_buffer(file: &mut File, buffer: &mut [u8; SNES_BUFFER_SIZE]) {
     file.read(buffer);
 }
 
-fn get_rom_type(buffer: u8) -> RomType {
-    number_to_enum!(buffer => RomType<u8>{
+fn get_rom_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomType {
+
+    number_to_enum!(buffer[RomTypeIndex] => RomType<u8>{
             ROM,
             ROMRAM,
             ROMSRAM,
@@ -125,12 +122,13 @@ fn get_rom_type(buffer: u8) -> RomType {
             FX,
             Unknown
         };
-        panic!("Cannot convert number to get_rom_type")
+        panic!("Cannot convert number to RomType")
     )
 }
 
-fn get_rom_makeup_type(buffer: u8) -> RomMarkupType {
-    number_to_enum!(buffer => RomMarkupType<u8>{
+fn get_rom_makeup_type(buffer: [u8; SNES_BUFFER_SIZE]) -> RomMarkupType {
+
+    number_to_enum!(buffer[RomMarkupTypeIndex] => RomMarkupType<u8>{
             LoROM,
             HiROM,
             LoROMFastROM,
@@ -143,8 +141,9 @@ fn get_rom_makeup_type(buffer: u8) -> RomMarkupType {
     )
 }
 
-fn get_location(buffer: u8) -> VideoMode {
-    return match buffer {
+fn get_video_mode(buffer: [u8; SNES_BUFFER_SIZE]) -> VideoMode {
+
+    return match buffer[VideoModeIndex]{
         0 => VideoMode {
             country: "Japan".to_string(),
             mode: "NTSC".to_string(),
